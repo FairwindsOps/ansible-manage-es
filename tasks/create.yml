@@ -1,0 +1,42 @@
+---
+
+- name: set up variables
+  set_fact:
+    es_cluster_config:
+      InstanceType: "{{ es_instance_type }}"
+      InstanceCount: "{{ es_instance_count | int }}"
+      DedicatedMasterEnabled: "{{ es_dedicated_master | bool }}"
+      ZoneAwarenessEnabled: "{{ es_zone_awareness | bool }}"
+    es_ebs_config:
+      EBSEnabled: "{{ es_ebs_enabled | bool }}"
+      VolumeType: "{{ es_ebs_volume_type }}"
+      VolumeSize: "{{ es_ebs_volume_size }}"
+
+- name: set master configs
+  set_fact:
+    es_cluster_config: "{{ es_cluster_config | combine( {
+      DedicatedMasterType: '{{ es_dedicated_master_type }}',
+      DedicatedMasterCount: '{{ es_dedicated_master_count }}'
+    }) }}"
+  when: es_dedicated_master
+
+- name: set iops for io1 volumes
+  set_fact:
+    es_ebs_config: "{{ es_ebs_config | combine( { 'Iops' : es_ebs_iops } ) }}"
+  when: es_ebs_volume_type == 'io1'
+
+- debug: msg="{{ es_cluster_config | from_yaml }}"
+- debug: msg="{{ es_ebs_config | from_yaml }}"
+
+- command: /bin/echo 'hello {{ es_cluster_config | to_json }}'
+  register: echo_out
+- debug: var=echo_out.stdout
+- name: create Elasticsearch domain
+  command: aws --region "{{ aws_region }}" es create-elasticsearch-domain
+            --domain-name "{{ es_domain_name | mandatory }}"
+            --elasticsearch-version "{{ es_version }}"
+            --elasticsearch-cluster-config '{{ es_cluster_config | to_json | regex_replace('"([0-9]+)"','\1') }}'
+            # --ebs-options "{{ es_ebs_config }}"
+  register: es_create_domain_output
+- debug: var=es_create_domain_output.stdout
+  # when: not es_domains_output

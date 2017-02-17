@@ -1,9 +1,8 @@
 ---
 
-- name: create Elasticsearch domain
-  command: aws --region "{{ aws_region }}" es create-elasticsearch-domain
+- name: update Elasticsearch domain
+  command: aws --region "{{ aws_region }}" es update-elasticsearch-domain-config
             --domain-name "{{ es_domain_name | mandatory }}"
-            --elasticsearch-version "{{ es_version }}"
             --elasticsearch-cluster-config '{{ es_cluster_config | to_json | regex_replace('"([0-9]+)"','\1') }}'
             --ebs-options '{{ es_ebs_config | to_json | regex_replace('"([0-9]+)"','\1') }}'
             --access-policies '{{ es_access_policy | to_json }}'

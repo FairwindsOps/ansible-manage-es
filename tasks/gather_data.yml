@@ -11,6 +11,13 @@
                     | json_query('DomainNames[*].DomainName')
                     | list }}"
 
-# TODO: remove
-- debug: var=es_domains
-  when: "'fiance-staging' in es_domains"
+
+- name: determine if Elasticsearch domain already exists
+  set_fact:
+    es_domain_exists: yes
+  when: es_domain_name in es_domains
+
+- block:
+    - debug: var=es_domains
+    - debug: var=es_domain_exists
+  when: es_debug | bool

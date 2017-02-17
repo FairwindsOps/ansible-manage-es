@@ -1,37 +1,45 @@
-Manage ES (Elasticsearch Service)
+Manage AWS ES (Elasticsearch Service) domains
 =========
 
+This Ansible role can be used to create and modify AWS Elasticsearch Service Domains.
+
 ## Usage
-```
-- role: reactiveops.manage-es
-  es_domain_name: "{{ env }}"
-  es_version:
-  es_elasticsearch_cluster_config
-  es_ebs_options
-  es_access_policies
-  es_snapshot_options
-  es_advanced_options
-  es_cli_input_json
-  es_generate_cli_skeleton
 
+The only truly required variable is `es_domain_name`, but without the `es_ip_whitelist` you will not be able to connect to the Elasticsearch Service endpoint. At this point only IP whitelisting is supported. The following will create a single instance Elasticsearch Service domain.
 
-  rds_environment: "{{ env }}"
-  rds_context: "{{ context }}"
-  rds_security_group_ids: "{{ hostvars[inventory_hostname][context + '_data'] }}"
-  rds_master_username: "{{ lookup('env', 'RDS_USER') }}"
-  rds_master_password: "{{ lookup('env', 'RDS_PASSWORD') }}"
-  rds_db_engine: "postgres"
-  rds_db_engine_version: "9.5.4"
+```yaml
+- role: ansible-manage-es
+  es_domain_name: 'my-search-thingy'
+  es_instance_type: 'm3.medium.elasticsearch'
+  es_ip_whitelist:
+    - "111.111.111.111"
+    - "222.222.222.1/24"
 ```
 
-It is also possible to use this role to modify an instance. To do so it is easiest to override settings from the command line:
+By default the cluster is not aware of zones. This can be enabled via the following setting. You will also need an even number in the `es_instance_count` setting.
 
-```shell
-ansible-playbook stack.yml  -e 'rds_command=modify' -e 'apply_immediately=yes'
+```yaml
+  es_zone_awareness: yes
+  es_instance_count: 2
 ```
 
-For a list of valid `rds_db_engine` and `rds_db_engine_version` values, run `aws rds describe-db-engine-versions`.
+To avoid issue with cluster coordination you can create dedicated masters. These do not need to large in size.
 
-The result of the `rds` resource will be stored in `manage_rds_{{ rds_name | replace('-', '_') }}": "{{result}}`. A `rds_name` of `foo-bar` would be set as `manage_rds_foo_bar`.
+```yaml
 
-Custom parameter groups can be specified with `rds_db_parameter_group`. A default will be picked based on the engine and engine version if not specified.
+  es_dedicated_master: yes
+  es_dedicated_master_type: 't2.small.elasticsearch'
+  es_dedicated_master_count: '3'
+```
+
+For clusters that need to store a lot of data it makes sense to use EBS volumes:
+
+```yaml
+  es_ebs_enabled: yes
+  es_ebs_volume_type: gp2
+  es_ebs_volume_size: 10
+```
+
+note: if the `es_ebs_volume_type` is `io1` then `es_ebs_iops` must also be set.
+
+Please consult [defaults/main.yml](defaults/main.yml) for default settings.

@@ -1,0 +1,47 @@
+---
+
+- name: set up variables
+  set_fact:
+    es_cluster_config:
+      InstanceType: "{{ es_instance_type }}"
+      InstanceCount: "{{ es_instance_count | int }}"
+      DedicatedMasterEnabled: "{{ es_dedicated_master | bool }}"
+      ZoneAwarenessEnabled: "{{ es_zone_awareness | bool }}"
+    es_ebs_config:
+      EBSEnabled: "{{ es_ebs_enabled | bool }}"
+    es_access_policy:
+      Version: '2012-10-17'
+      Statement:
+        - Action: 'es:*'
+          Principal: '*'
+          Effect: Allow
+          Condition:
+            IpAddress:
+              'aws:SourceIp': "{{ es_ip_whitelist }}"
+
+- name: set master configs
+  set_fact:
+    es_cluster_config: "{{ es_cluster_config | combine( {
+      'DedicatedMasterType': es_dedicated_master_type,
+      'DedicatedMasterCount': es_dedicated_master_count
+    }) }}"
+  when: es_dedicated_master | bool
+
+- name: set ebs configs when enabled
+  set_fact:
+    es_ebs_config: "{{ es_ebs_config | combine( {
+      'VolumeType': es_ebs_volume_type,
+      'VolumeSize': es_ebs_volume_size
+    } ) }}"
+  when: es_ebs_enabled | bool
+
+- name: set iops for io1 volumes
+  set_fact:
+    es_ebs_config: "{{ es_ebs_config | combine( { 'Iops' : es_ebs_iops } ) }}"
+  when: es_ebs_volume_type == 'io1'
+
+- block:
+    - debug: var=es_cluster_config
+    - debug: var=es_access_policy
+    - debug: var=es_ebs_config
+  when: es_debug | bool

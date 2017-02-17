@@ -4,15 +4,23 @@ aws_region: 'us-east-1'
 
 es_version: '5.1'
 
+es_debug: no
+
 # ES cluster config
 es_instance_type: 'm3.medium.elasticsearch'
 es_instance_count: '1'
 es_zone_awareness: no
 es_dedicated_master: no
-es_dedicated_master_type: 't2.micro.elasticsearch'
+es_dedicated_master_type: 't2.small.elasticsearch'
 es_dedicated_master_count: '3'
 
 # ES EBS config
 es_ebs_enabled: no
 es_ebs_volume_type: 'gp2'
 es_ebs_volume_size: 20
+
+# IP whitelist
+es_ip_whitelist: []
+
+# default to be updated after checking
+es_domain_exists: no

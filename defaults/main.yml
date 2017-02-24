@@ -24,3 +24,4 @@ es_ip_whitelist: []
 
 # default to be updated after checking
 es_domain_exists: no
+es_allow_update: no

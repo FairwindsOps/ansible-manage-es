@@ -5,6 +5,8 @@ This Ansible role can be used to create and modify AWS Elasticsearch Service Dom
 
 ## Usage
 
+This role will create or update an AWS Elasticsearch Domain. At this time an update will always end up recreating things even if nothing has changed, since AWS doesn't check if anything needs to be done. To avoid unnecessary updates and replacements you will need to set `es_domain_update` to yes. It defaults to no.  
+
 The only truly required variables are `es_domain_name` and `aws_region`, but without the `es_ip_whitelist` you will not be able to connect to the Elasticsearch Service endpoint. At this point only IP whitelisting is supported. The following will create a single instance Elasticsearch Service domain.
 
 ```yaml

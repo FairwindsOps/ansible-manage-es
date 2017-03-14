@@ -16,7 +16,7 @@ Two types of services need authentication to the ES domnain:
 * Those sending logs to ES.
 * Those connecting to Kibana (or ES) to view data.
 
-For the former, this role adds your NAT instances to an IP whitelist be default in order to cover the common use-case of any of your internal-only systems sending logs.  You may also include any other IPs you'd like to whitelist via the `ep_ip_whitelist` variable.  Should you not want to use IP whitelisting, and would instead prefer to use request signing and IAM role-based access, you can include the ARNs which you would like to grant permission to in the `iam_arn_whitelist` variable. 
+For the former, this role adds your NAT instances to an IP whitelist by default in order to cover the common usecase of any of your VPC internal-only systems sending logs.  You may also include any other IPs you'd like to whitelist via the `ep_ip_whitelist` variable.  Should you not want to use IP whitelisting, and would instead prefer to use request signing and IAM role-based access, you can include the ARNs which you would like to grant permission to in the `iam_arn_whitelist` variable. 
 
 For the latter, you will need to include your personal IP in the `es_ip_whitelist` variable.  In order to connect to kibana only IP whitelisting is supported.
 

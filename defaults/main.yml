@@ -22,6 +22,9 @@ es_ebs_volume_size: 20
 # IP whitelist
 es_ip_whitelist: []
 
+# Enable IAM policies and request signing from resources
+iam_arn_whitelist: []
+
 # default to be updated after checking
 es_domain_exists: no
 es_allow_update: no

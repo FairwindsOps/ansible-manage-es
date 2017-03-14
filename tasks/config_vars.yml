@@ -1,6 +1,31 @@
 ---
 
-- name: set up variables
+- name: set up IAM profile statements
+  set_fact:
+    iam_profiles: []
+    iam_arn_whitelist_list: "{{ iam_arn_whitelist }}"
+
+- name: set up IAM profile statements
+  set_fact:
+    iam_profiles: "{{ iam_profiles }} + [ { 'Action': 'es:*', 'Effect': 'Allow', 'Principal': { 'AWS': ['{{ item }}'] } } ]"
+  with_items: "{{ iam_arn_whitelist }}"
+  when: "{{ iam_arn_whitelist_list|length > 0 }}"
+
+- name: set up variables with IAM profiles
+  set_fact:
+    es_cluster_config:
+      InstanceType: "{{ es_instance_type }}"
+      InstanceCount: "{{ es_instance_count | int }}"
+      DedicatedMasterEnabled: "{{ es_dedicated_master | bool }}"
+      ZoneAwarenessEnabled: "{{ es_zone_awareness | bool }}"
+    es_ebs_config:
+      EBSEnabled: "{{ es_ebs_enabled | bool }}"
+    es_access_policy:
+      Version: '2012-10-17'
+      Statement: "{{ iam_profiles }} + [ { 'Action': 'es:*', 'Principal': '*', 'Effect': 'Allow', 'Condition': { 'IpAddress': { 'aws:SourceIp': {{ es_ip_whitelist }} } } } ]"
+  when: "{{ iam_profiles|length > 0 }}"
+
+- name: set up variables without IAM profiles
   set_fact:
     es_cluster_config:
       InstanceType: "{{ es_instance_type }}"
@@ -18,6 +43,7 @@
           Condition:
             IpAddress:
               'aws:SourceIp': "{{ es_ip_whitelist }}"
+  when: es_access_policy is undefined
 
 - name: set master configs
   set_fact:

@@ -62,6 +62,9 @@
       ZoneAwarenessEnabled: true
     es_ebs_config:
       EBSEnabled: "{{ es_ebs_enabled | bool }}"
+    es_access_policy:
+      Version: '2012-10-17'
+      Statement: "{{ iam_profiles }} + [ { 'Action': 'es:*', 'Principal': '*', 'Effect': 'Allow', 'Condition': { 'IpAddress': { 'aws:SourceIp': {{ es_ip_whitelist }} } } } ]"
   when:
     - es_subnets
 

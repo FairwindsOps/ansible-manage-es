@@ -9,5 +9,9 @@
     - not es_domain_exists
     - not es_subnets
 
+- include: create_es_vpc.yml
+  when:
+    - not es_domain_exists
+
 - include: update.yml
   when: es_domain_exists and es_allow_update | bool

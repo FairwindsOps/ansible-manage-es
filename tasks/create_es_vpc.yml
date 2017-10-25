@@ -1,0 +1,20 @@
+---
+
+ - name: set up service-linked role
+   command: >
+     aws iam create-service-linked-role \
+     --aws-service-name es.amazonaws.com
+   ignore_errors: True
+
+ - name: create Elasticsearch domain inside VPC
+   command: aws --region "{{ aws_region }}" es create-elasticsearch-domain
+             --vpc-options '{{ es_vpc_config | to_json | regex_replace('"([0-9]+)"','\1') }}'
+             --domain-name "{{ es_domain_name | mandatory }}"
+             --elasticsearch-version "{{ es_version }}"
+             --elasticsearch-cluster-config '{{ es_cluster_config | to_json | regex_replace('"([0-9]+)"','\1') }}'
+             --ebs-options '{{ es_ebs_config | to_json | regex_replace('"([0-9]+)"','\1') }}'
+             --access-policies '{{ es_access_policy | to_json }}'
+   register: es_create_domain_output
+
+ - debug: var=es_create_domain_output.stdout
+   when: es_debug | bool

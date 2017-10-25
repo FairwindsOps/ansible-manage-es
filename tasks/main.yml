@@ -5,7 +5,9 @@
 - include: config_vars.yml
 
 - include: create.yml
-  when: not es_domain_exists
+  when:
+    - not es_domain_exists
+    - not es_subnets
 
 - include: update.yml
   when: es_domain_exists and es_allow_update | bool

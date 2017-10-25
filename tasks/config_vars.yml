@@ -23,7 +23,9 @@
     es_access_policy:
       Version: '2012-10-17'
       Statement: "{{ iam_profiles }} + [ { 'Action': 'es:*', 'Principal': '*', 'Effect': 'Allow', 'Condition': { 'IpAddress': { 'aws:SourceIp': {{ es_ip_whitelist }} } } } ]"
-  when: "{{ iam_profiles|length > 0 }}"
+  when:
+    - "{{ iam_profiles|length > 0 }}"
+    - es_subnets is undefined
 
 - name: set up variables without IAM profiles
   set_fact:
@@ -43,7 +45,10 @@
           Condition:
             IpAddress:
               'aws:SourceIp': "{{ es_ip_whitelist }}"
-  when: es_access_policy is undefined
+  when:
+   - es_access_policy
+   - es_subnets is undefined
+
 
 - name: set up vpc config variables
   set_fact:

@@ -45,6 +45,21 @@
               'aws:SourceIp': "{{ es_ip_whitelist }}"
   when: es_access_policy is undefined
 
+- name: set up vpc config variables
+  set_fact:
+    es_vpc_config:
+      SubnetIds: "{{ es_subnets }}"
+      SecurityGroupIds: "{{ es_security_groups }}"
+    es_cluster_config:
+      InstanceType: "{{ es_instance_type }}"
+      InstanceCount: "{{ es_instance_count | int }}"
+      DedicatedMasterEnabled: "{{ es_dedicated_master | bool }}"
+      ZoneAwarenessEnabled: true
+    es_ebs_config:
+      EBSEnabled: "{{ es_ebs_enabled | bool }}"
+  when:
+    - es_subnets
+
 - name: set master configs
   set_fact:
     es_cluster_config: "{{ es_cluster_config | combine( {

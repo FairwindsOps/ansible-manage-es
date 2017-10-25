@@ -18,6 +18,20 @@
       Statement: "{{ iam_profiles }} + [ { 'Action': 'es:*', 'Principal': '*', 'Effect': 'Allow', 'Condition': { 'IpAddress': { 'aws:SourceIp': {{ es_ip_whitelist }} } } } ]"
   when:
     - "{{ iam_profiles|length > 0 }}"
+    - es_network == 'public'
+
+
+- name: set up es_access_policy for vpc
+  set_fact:
+    es_access_policy:
+      Version: '2012-10-17'
+      Statement: "{{ iam_profiles }} + [ { 'Action': 'es:*', 'Principal': '*', 'Effect': 'Allow' } ]"
+  when:
+    - "{{ iam_profiles|length > 0 }}"
+    - es_network == 'vpc'
+
+
+
 
 - name: set up es_access_policy without IAM profiles
   set_fact:
@@ -32,6 +46,7 @@
               'aws:SourceIp': "{{ es_ip_whitelist }}"
   when:
    - es_access_policy
+   - es_network == 'public'
 
 - name: set up es_cluster_config and es_ebs_config for public endpoint
   set_fact:
@@ -42,7 +57,7 @@
       ZoneAwarenessEnabled: "{{ es_zone_awareness | bool }}"
     es_ebs_config:
       EBSEnabled: "{{ es_ebs_enabled | bool }}"
-  when:  es_subnets is undefined
+  when: es_network == 'public'
 
 - name: set up vpc config variables
   set_fact:
@@ -57,7 +72,7 @@
     es_ebs_config:
       EBSEnabled: "{{ es_ebs_enabled | bool }}"
   when:
-    - es_subnets
+    - es_network == 'vpc'
 
 - name: set master configs
   set_fact:

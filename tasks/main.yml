@@ -19,3 +19,10 @@
     - es_domain_exists
     - es_allow_update | bool
     - es_network == 'public'
+
+- include: update_es_vpc.yml
+  when:
+    - es_domain_exists
+    - es_allow_update | bool
+    - es_network == 'vpc'
+

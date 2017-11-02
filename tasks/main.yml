@@ -5,7 +5,24 @@
 - include: config_vars.yml
 
 - include: create.yml
-  when: not es_domain_exists
+  when:
+    - not es_domain_exists
+    - es_network == 'public'
+
+- include: create_es_vpc.yml
+  when:
+    - not es_domain_exists
+    - es_network == 'vpc'
 
 - include: update.yml
-  when: es_domain_exists and es_allow_update | bool
+  when:
+    - es_domain_exists
+    - es_allow_update | bool
+    - es_network == 'public'
+
+- include: update_es_vpc.yml
+  when:
+    - es_domain_exists
+    - es_allow_update | bool
+    - es_network == 'vpc'
+

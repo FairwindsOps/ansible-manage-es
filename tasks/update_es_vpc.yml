@@ -1,0 +1,13 @@
+---
+
+- name: update Elasticsearch domain
+  command: aws --region "{{ aws_region }}" es update-elasticsearch-domain-config
+            --vpc-options '{{ es_vpc_config | to_json | regex_replace('"([0-9]+)"','\1') }}'
+            --domain-name "{{ es_domain_name | mandatory }}"
+            --elasticsearch-cluster-config '{{ es_cluster_config | to_json | regex_replace('"([0-9]+)"','\1') }}'
+            --ebs-options '{{ es_ebs_config | to_json | regex_replace('"([0-9]+)"','\1') }}'
+            --access-policies '{{ es_access_policy | to_json }}'
+  register: es_create_domain_output
+
+- debug: var=es_create_domain_output.stdout
+  when: es_debug | bool

@@ -5,17 +5,23 @@
   register: es_domains_output
   # when: not es_domains_output
 
+- name: count list of Elasticsearch domains 
+  set_fact: 
+    es_domains_count: "{{ (es_domains_output.stdout | from_json) | json_query('DomainNames[*]') | count }}"
+
 - name: extract json
   set_fact:
     es_domains: "{{ (es_domains_output.stdout | from_json)
                     | json_query('DomainNames[*].DomainName')
                     | list }}"
-
+  when: es_domains_count > 0
 
 - name: determine if Elasticsearch domain already exists
   set_fact:
     es_domain_exists: yes
-  when: es_domain_name in es_domains
+  when: 
+    - es_domains 
+    - es_domain_name in es_domains
 
 - block:
     - debug: var=es_domains

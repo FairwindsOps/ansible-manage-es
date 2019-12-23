@@ -2,7 +2,7 @@
 galaxy_info:
   author: Matthias Johnson @opennomad
   description: A role create and update AWS Elasticsearch Service clusters
-  company: ReactiveOps
+  company: Fairwinds
   license: license (GPLv2, CC-BY, etc)
   min_ansible_version: 2.1
   galaxy_tags: []
